@@ -6,8 +6,8 @@ function Loader() {
       initial={{ opacity: 1 }}
       animate={{ opacity: 0 }}
       transition={{
-        delay: 2,
-        duration: 1,
+        delay: 0.5,
+        duration: 0.8,
       }}
       className="fixed inset-0 bg-black z-[9999] flex items-center justify-center pointer-events-none"
     >
