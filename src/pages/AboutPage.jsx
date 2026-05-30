@@ -120,6 +120,7 @@ function AboutPage() {
               muted
               loop
               playsInline
+              poster="https://images.unsplash.com/photo-1519046904884-53103b34b206?auto=format&fit=crop&w=1920&q=80"
               className="w-full h-full object-cover opacity-70"
             >
               <source src={heroVideo} type="video/mp4" />

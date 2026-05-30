@@ -100,7 +100,7 @@ function EventsPage() {
         {/* HERO */}
         <section className="relative h-[90vh] flex items-center justify-center overflow-hidden bg-[#111827]">
           <motion.div style={{ y }} className="absolute inset-0 w-full h-full">
-            <video autoPlay muted loop playsInline className="w-full h-full object-cover opacity-60 mix-blend-screen">
+            <video autoPlay muted loop playsInline poster="https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?auto=format&fit=crop&w=1920&q=80" className="w-full h-full object-cover opacity-60 mix-blend-screen">
               <source src={heroVideo} type="video/mp4" />
             </video>
             <div className="absolute inset-0 bg-gradient-to-t from-[#111827] via-transparent to-transparent"></div>
