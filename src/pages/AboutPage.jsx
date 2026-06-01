@@ -120,7 +120,7 @@ function AboutPage() {
               muted
               loop
               playsInline
-              poster="https://images.unsplash.com/photo-1519046904884-53103b34b206?auto=format&fit=crop&w=1920&q=80"
+              poster="story.jpg"
               className="w-full h-full object-cover opacity-70"
             >
               <source src={heroVideo} type="video/mp4" />
@@ -195,7 +195,7 @@ function AboutPage() {
 
               <div className="pt-10">
                 <img 
-                  src="https://images.unsplash.com/photo-1519046904884-53103b34b206" 
+                  src="story.jpg" 
                   alt="Attela Experience" 
                   className="w-full h-[500px] object-cover rounded-[40px] shadow-2xl"
                 />
@@ -252,7 +252,7 @@ function AboutPage() {
           {/* Subtle background image */}
           <div 
             className="absolute inset-0 bg-cover bg-center opacity-10 mix-blend-overlay"
-            style={{ backgroundImage: "url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e')" }}
+            style={{ backgroundImage: "url('experience.jpg')" }}
           ></div>
           
           <div className="relative z-10 max-w-[1600px] mx-auto text-center">

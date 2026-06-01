@@ -230,14 +230,14 @@ function ContactPage() {
               </p>
 
               <div className="flex flex-col gap-6">
-                <a href="#" className="flex items-center justify-between group border-b border-white/10 pb-6 hover:border-[#ea580c] transition duration-500">
+                <a href="https://www.instagram.com/attela_beach_resort/" className="flex items-center justify-between group border-b border-white/10 pb-6 hover:border-[#ea580c] transition duration-500">
                   <span className="text-2xl font-medium group-hover:text-[#ea580c] transition duration-500">Instagram</span>
                   <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-[#ea580c] transition duration-500">
                     <FaInstagram className="text-xl" />
                   </div>
                 </a>
 
-                <a href="#" className="flex items-center justify-between group border-b border-white/10 pb-6 hover:border-[#ea580c] transition duration-500">
+                <a href="https://www.facebook.com/profile.php?id=100071867684940" className="flex items-center justify-between group border-b border-white/10 pb-6 hover:border-[#ea580c] transition duration-500">
                   <span className="text-2xl font-medium group-hover:text-[#ea580c] transition duration-500">Facebook</span>
                   <div className="w-12 h-12 rounded-full bg-white/5 flex items-center justify-center group-hover:bg-[#ea580c] transition duration-500">
                     <FaFacebookF className="text-xl" />

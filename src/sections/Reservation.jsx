@@ -9,7 +9,7 @@ function Reservation() {
                 className="absolute inset-0 bg-cover bg-center"
                 style={{
                     backgroundImage:
-                        "url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e')",
+                        "url('experience.jpg')",
                 }}
             >
                 <div className="absolute inset-0 bg-white/50 backdrop-blur-[2px]"></div>

@@ -15,7 +15,7 @@ function About() {
           className="relative"
         >
           <img
-            src="https://images.unsplash.com/photo-1519046904884-53103b34b206"
+            src="story.jpg"
             alt="Beach Resort"
             className="rounded-3xl shadow-2xl h-[600px] object-cover w-full"
           />

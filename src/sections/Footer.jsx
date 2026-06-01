@@ -75,11 +75,11 @@ function Footer() {
             </h3>
 
             <div className="flex gap-6 text-2xl text-[#ea580c]">
-              <a href="#" className="hover:text-[#0ea5e9] transition-colors">
+              <a href="https://www.instagram.com/attela_beach_resort/" className="hover:text-[#0ea5e9] transition-colors">
                 <FaInstagram />
               </a>
 
-              <a href="#" className="hover:text-[#0ea5e9] transition-colors">
+              <a href="https://www.facebook.com/profile.php?id=100071867684940" className="hover:text-[#0ea5e9] transition-colors">
                 <FaFacebookF />
               </a>
 

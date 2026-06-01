@@ -19,7 +19,7 @@ function Hero() {
         muted
         loop
         playsInline
-        poster="https://images.unsplash.com/photo-1519046904884-53103b34b206?auto=format&fit=crop&w=1920&q=80"
+        poster="story.jpg"
         className="absolute inset-0 w-full h-full object-cover"
       >
         <source src={heroVideo} type="video/mp4" />

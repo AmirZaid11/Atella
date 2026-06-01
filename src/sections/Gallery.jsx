@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 const galleryImages = [
   {
     image:
-      "https://images.unsplash.com/photo-1507525428034-b723cf961d3e",
+      "experience.jpg",
     title: "Luxury Sunsets",
   },
 
@@ -15,7 +15,7 @@ const galleryImages = [
 
   {
     image:
-      "https://images.unsplash.com/photo-1519046904884-53103b34b206",
+      "story.jpg",
     title: "Beachfront Relaxation",
   },
 
@@ -27,7 +27,7 @@ const galleryImages = [
 
   {
     image:
-      "https://images.unsplash.com/photo-1519671482749-fd09be7ccebf",
+      "e2.jpg",
     title: "Dining & Cocktails",
   },
 
