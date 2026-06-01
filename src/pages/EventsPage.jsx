@@ -62,14 +62,14 @@ const featuredEvents = [
     title: "Full Moon Festival",
     type: "Special Event",
     desc: "Our legendary monthly beach festival under the stars. Expect fire dancers, a massive outdoor stage, and 2000+ guests.",
-    image: "e1.jpg",
+    image: "/e1.jpg",
     date: "July 15, 2026"
   },
   {
     title: "Exclusive Jazz Night",
     type: "Live Band",
     desc: "An intimate evening of premium dining and live jazz performances in our glass-walled lounge overlooking the water.",
-    image: "e2.jpg",
+    image: "/e2.jpg",
     date: "Every Thursday"
   },
 ];
@@ -100,7 +100,7 @@ function EventsPage() {
         {/* HERO */}
         <section className="relative h-[90vh] flex items-center justify-center overflow-hidden bg-[#111827]">
           <motion.div style={{ y }} className="absolute inset-0 w-full h-full">
-            <video autoPlay muted loop playsInline poster="experience.jpg" className="w-full h-full object-cover opacity-60 mix-blend-screen">
+            <video autoPlay muted loop playsInline poster="/experience.jpg" className="w-full h-full object-cover opacity-60 mix-blend-screen">
               <source src={heroVideo} type="video/mp4" />
             </video>
             <div className="absolute inset-0 bg-gradient-to-t from-[#111827] via-transparent to-transparent"></div>

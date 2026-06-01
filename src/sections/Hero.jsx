@@ -19,7 +19,7 @@ function Hero() {
         muted
         loop
         playsInline
-        poster="story.jpg"
+        poster="/story.jpg"
         className="absolute inset-0 w-full h-full object-cover"
       >
         <source src={heroVideo} type="video/mp4" />

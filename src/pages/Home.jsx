@@ -11,9 +11,9 @@ function Home() {
   const { content } = useCMS("home", {
     welcome_subtitle: "Welcome To Attela",
     welcome_title: "Luxury Beyond\nExpectations",
-    about_card_img: "story.jpg",
-    events_card_img: "e1.jpg",
-    gallery_card_img: "experience.jpg"
+    about_card_img: "/story.jpg",
+    events_card_img: "/e1.jpg",
+    gallery_card_img: "/experience.jpg"
   });
 
   return (

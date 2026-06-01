@@ -15,7 +15,7 @@ function About() {
           className="relative"
         >
           <img
-            src="story.jpg"
+            src="/story.jpg"
             alt="Beach Resort"
             className="rounded-3xl shadow-2xl h-[600px] object-cover w-full"
           />

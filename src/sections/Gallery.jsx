@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 const galleryImages = [
   {
     image:
-      "experience.jpg",
+      "/experience.jpg",
     title: "Luxury Sunsets",
   },
 
@@ -15,7 +15,7 @@ const galleryImages = [
 
   {
     image:
-      "story.jpg",
+      "/story.jpg",
     title: "Beachfront Relaxation",
   },
 
@@ -27,7 +27,7 @@ const galleryImages = [
 
   {
     image:
-      "e2.jpg",
+      "/e2.jpg",
     title: "Dining & Cocktails",
   },
 

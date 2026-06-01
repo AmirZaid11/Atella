@@ -120,7 +120,7 @@ function AboutPage() {
               muted
               loop
               playsInline
-              poster="story.jpg"
+              poster="/story.jpg"
               className="w-full h-full object-cover opacity-70"
             >
               <source src={heroVideo} type="video/mp4" />
@@ -195,7 +195,7 @@ function AboutPage() {
 
               <div className="pt-10">
                 <img 
-                  src="story.jpg" 
+                  src="/story.jpg" 
                   alt="Attela Experience" 
                   className="w-full h-[500px] object-cover rounded-[40px] shadow-2xl"
                 />
@@ -252,7 +252,7 @@ function AboutPage() {
           {/* Subtle background image */}
           <div 
             className="absolute inset-0 bg-cover bg-center opacity-10 mix-blend-overlay"
-            style={{ backgroundImage: "url('experience.jpg')" }}
+            style={{ backgroundImage: "url('/experience.jpg')" }}
           ></div>
           
           <div className="relative z-10 max-w-[1600px] mx-auto text-center">

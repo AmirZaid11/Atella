@@ -18,7 +18,7 @@ const events = [
   {
     title: "Sunday Chill & Grill",
     image:
-      "e2.jpg",
+      "/e2.jpg",
     desc: "Relax with nyama choma, seafood, and smooth lounge music.",
   },
 ];
