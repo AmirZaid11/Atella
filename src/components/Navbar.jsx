@@ -27,8 +27,13 @@ function Navbar() {
       <div className="w-full px-6 flex justify-between items-center">
 
         {/* LOGO */}
-        <Link to="/">
-          <h1 className="text-2xl md:text-3xl font-bold tracking-[4px] text-[#ea580c] cursor-pointer hover:scale-105 transition-transform duration-300">
+        <Link to="/" className="flex items-center gap-3 group">
+          <img 
+            src="/alogo.png" 
+            alt="Attela Logo" 
+            className="w-12 h-12 md:w-14 md:h-14 object-contain rounded-full shadow-[0_0_10px_rgba(234,88,12,0.3)] group-hover:scale-110 transition-transform duration-300" 
+          />
+          <h1 className="text-xl md:text-2xl font-bold tracking-[4px] text-[#ea580c] cursor-pointer group-hover:text-yellow-500 transition-colors duration-300 hidden sm:block">
             ATTELA
           </h1>
         </Link>
