@@ -206,7 +206,7 @@ Feel free to open issues or pull requests to enhance the luxury experience of At
 
 ## 📄 License
 
-This project is licensed under the MIT License - see your local repository details for info. Made for showcase, presentation, and premium portfolio demonstration.
+This project is licensed under the MIT License | Made for showcase, presentation, and premium portfolio demonstration.
 
 ---
 
