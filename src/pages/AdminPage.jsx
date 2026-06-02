@@ -3,10 +3,27 @@ import { supabase } from "../lib/supabase";
 import { 
   FaTrash, FaUpload, FaSpinner, FaImage, FaBullhorn, FaSignOutAlt, 
   FaPlus, FaCheckCircle, FaTimesCircle, FaChartLine, FaUsers, 
-  FaGlassCheers, FaEye, FaEdit 
+  FaGlassCheers, FaEye, FaEdit, FaRegCalendarAlt
 } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
+
+const defaultFeaturedEvents = [
+  {
+    title: "Full Moon Festival",
+    type: "Special Event",
+    desc: "Our legendary monthly beach festival under the stars. Expect fire dancers, a massive outdoor stage, and 2000+ guests.",
+    image: "/e1.jpg",
+    date: "July 15, 2026"
+  },
+  {
+    title: "Exclusive Jazz Night",
+    type: "Live Band",
+    desc: "An intimate evening of premium dining and live jazz performances in our glass-walled lounge overlooking the water.",
+    image: "/e2.jpg",
+    date: "Every Thursday"
+  },
+];
 
 function AdminPage() {
   const navigate = useNavigate();
@@ -45,10 +62,19 @@ function AdminPage() {
   const [cmsError, setCmsError] = useState(null);
   const pageOptions = ["home", "about", "events", "vip", "contact"];
 
+  // --- EVENTS STATE ---
+  const [eventList, setEventList] = useState([]);
+  const [eventForm, setEventForm] = useState({ title: "", type: "", desc: "", date: "" });
+  const [eventFile, setEventFile] = useState(null);
+  const [addingEvent, setAddingEvent] = useState(false);
+  const [countdownForm, setCountdownForm] = useState({ next_event_title: "Beach Festival", event_date: "2026-12-31T23:59:59" });
+  const [savingCountdown, setSavingCountdown] = useState(false);
+
   useEffect(() => {
     if (activeTab === "gallery" || activeTab === "overview") fetchImages();
     if (activeTab === "notifications" || activeTab === "overview") fetchAnnouncements();
     if (activeTab === "cms") fetchCms();
+    if (activeTab === "events" || activeTab === "overview") fetchEventsData();
   }, [activeTab]);
 
   const fetchImages = async () => {
@@ -142,6 +168,136 @@ function AdminPage() {
     fetchCms();
   };
 
+  // --- EVENTS LOGIC ---
+  const fetchEventsData = async () => {
+    try {
+      const { data } = await supabase.from("site_content").select("*").eq("page", "events");
+      if (data) {
+        const list = data.find(item => item.section_key === "featured_events");
+        if (list && list.content_value) {
+          try {
+            setEventList(JSON.parse(list.content_value));
+          } catch (e) {
+            setEventList(defaultFeaturedEvents);
+          }
+        } else {
+          setEventList(defaultFeaturedEvents);
+        }
+
+        const nextTitle = data.find(item => item.section_key === "next_event_title");
+        const nextDate = data.find(item => item.section_key === "event_date");
+        setCountdownForm({
+          next_event_title: nextTitle ? nextTitle.content_value : "Beach Festival",
+          event_date: nextDate ? nextDate.content_value : "2026-12-31T23:59:59"
+        });
+      } else {
+        setEventList(defaultFeaturedEvents);
+      }
+    } catch (err) {
+      console.error("Error fetching events:", err);
+      setEventList(defaultFeaturedEvents);
+    }
+  };
+
+  const handleSaveCountdown = async (e) => {
+    e.preventDefault();
+    setSavingCountdown(true);
+    try {
+      await supabase.from("site_content").upsert({
+        page: "events",
+        section_key: "next_event_title",
+        content_type: "text",
+        content_value: countdownForm.next_event_title
+      }, { onConflict: 'page, section_key' });
+
+      await supabase.from("site_content").upsert({
+        page: "events",
+        section_key: "event_date",
+        content_type: "text",
+        content_value: countdownForm.event_date
+      }, { onConflict: 'page, section_key' });
+
+      alert("Countdown updated successfully!");
+      fetchEventsData();
+    } catch (err) {
+      alert("Error saving countdown: " + err.message);
+    } finally {
+      setSavingCountdown(false);
+    }
+  };
+
+  const handleAddEvent = async (e) => {
+    e.preventDefault();
+    if (!eventFile) {
+      alert("Please select an event image");
+      return;
+    }
+    setAddingEvent(true);
+    try {
+      const fileName = `${Math.random()}.${eventFile.name.split('.').pop()}`;
+      const filePath = `events/${fileName}`;
+      await supabase.storage.from("images").upload(filePath, eventFile);
+      const { data: { publicUrl } } = supabase.storage.from("images").getPublicUrl(filePath);
+
+      const newEvent = {
+        title: eventForm.title,
+        type: eventForm.type,
+        desc: eventForm.desc,
+        image: publicUrl,
+        date: eventForm.date,
+        file_path: filePath
+      };
+
+      const updatedList = [...eventList, newEvent];
+
+      const { error } = await supabase.from("site_content").upsert({
+        page: "events",
+        section_key: "featured_events",
+        content_type: "text",
+        content_value: JSON.stringify(updatedList)
+      }, { onConflict: 'page, section_key' });
+
+      if (error) throw error;
+
+      setEventForm({ title: "", type: "", desc: "", date: "" });
+      setEventFile(null);
+      
+      const fileInput = document.getElementById("event-file-input");
+      if (fileInput) fileInput.value = "";
+      
+      setEventList(updatedList);
+      alert("Event added successfully!");
+    } catch (err) {
+      alert("Error adding event: " + err.message);
+    } finally {
+      setAddingEvent(false);
+    }
+  };
+
+  const handleDeleteEvent = async (indexToDelete) => {
+    if (!window.confirm("Are you sure you want to delete this event?")) return;
+    try {
+      const eventToDelete = eventList[indexToDelete];
+      const updatedList = eventList.filter((_, i) => i !== indexToDelete);
+
+      if (eventToDelete && eventToDelete.file_path) {
+        await supabase.storage.from("images").remove([eventToDelete.file_path]);
+      }
+
+      await supabase.from("site_content").upsert({
+        page: "events",
+        section_key: "featured_events",
+        content_type: "text",
+        content_value: JSON.stringify(updatedList)
+      }, { onConflict: 'page, section_key' });
+
+      setEventList(updatedList);
+      alert("Event deleted successfully!");
+    } catch (err) {
+      alert("Error deleting event: " + err.message);
+    }
+  };
+
 
   return (
     <div className="min-h-screen bg-[#0a0f18] text-white flex">
@@ -155,6 +311,7 @@ function AdminPage() {
           <button onClick={() => setActiveTab("cms")} className={`w-full flex items-center gap-4 px-6 py-4 rounded-xl font-bold transition-all duration-300 ${activeTab === "cms" ? "bg-[#8b5cf6]/10 text-[#8b5cf6] border border-[#8b5cf6]/30" : "text-white/50 hover:bg-white/5 hover:text-white"}`}><FaEdit className="text-xl" /> Page Editor</button>
           <button onClick={() => setActiveTab("gallery")} className={`w-full flex items-center gap-4 px-6 py-4 rounded-xl font-bold transition-all duration-300 ${activeTab === "gallery" ? "bg-[#ea580c]/10 text-[#ea580c] border border-[#ea580c]/30" : "text-white/50 hover:bg-white/5 hover:text-white"}`}><FaImage className="text-xl" /> Gallery Manager</button>
           <button onClick={() => setActiveTab("notifications")} className={`w-full flex items-center gap-4 px-6 py-4 rounded-xl font-bold transition-all duration-300 ${activeTab === "notifications" ? "bg-[#0ea5e9]/10 text-[#0ea5e9] border border-[#0ea5e9]/30" : "text-white/50 hover:bg-white/5 hover:text-white"}`}><FaBullhorn className="text-xl" /> Notifications</button>
+          <button onClick={() => setActiveTab("events")} className={`w-full flex items-center gap-4 px-6 py-4 rounded-xl font-bold transition-all duration-300 ${activeTab === "events" ? "bg-[#e11d48]/10 text-[#e11d48] border border-[#e11d48]/30" : "text-white/50 hover:bg-white/5 hover:text-white"}`}><FaRegCalendarAlt className="text-xl" /> Events Manager</button>
         </nav>
         <button onClick={handleLogout} className="flex items-center justify-center gap-3 w-full py-4 bg-red-500/10 text-red-500 rounded-xl hover:bg-red-500 hover:text-white transition duration-300 font-bold uppercase tracking-[2px]"><FaSignOutAlt /> Lock Terminal</button>
       </div>
@@ -167,7 +324,7 @@ function AdminPage() {
             <motion.div key="overview" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="max-w-6xl">
               <h2 className="text-4xl font-bold mb-2">System Analytics</h2>
               <p className="text-white/50 mb-10">Real-time performance metrics and system status.</p>
-              <div className="grid md:grid-cols-3 gap-6 mb-12">
+              <div className="grid md:grid-cols-4 gap-6 mb-12">
                 <div className="bg-[#111827] border border-white/5 p-8 rounded-[30px] shadow-2xl relative overflow-hidden group">
                   <FaUsers className="text-4xl text-[#22c55e] mb-6" />
                   <p className="text-white/50 font-bold uppercase tracking-[2px] text-sm mb-2">Monthly Visitors</p>
@@ -182,6 +339,11 @@ function AdminPage() {
                   <FaBullhorn className="text-4xl text-[#0ea5e9] mb-6" />
                   <p className="text-white/50 font-bold uppercase tracking-[2px] text-sm mb-2">Active Adverts</p>
                   <h3 className="text-5xl font-bold">{announcements.filter(a => a.is_active).length}</h3>
+                </div>
+                <div className="bg-[#111827] border border-white/5 p-8 rounded-[30px] shadow-2xl relative overflow-hidden group">
+                  <FaRegCalendarAlt className="text-4xl text-[#e11d48] mb-6" />
+                  <p className="text-white/50 font-bold uppercase tracking-[2px] text-sm mb-2">Active Events</p>
+                  <h3 className="text-5xl font-bold">{eventList.length}</h3>
                 </div>
               </div>
             </motion.div>
@@ -345,6 +507,107 @@ function AdminPage() {
                     </div>
                   </div>
                 ))}
+              </div>
+            </motion.div>
+          )}
+
+          {/* EVENTS TAB */}
+          {activeTab === "events" && (
+            <motion.div key="events" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="max-w-6xl space-y-12">
+              <div>
+                <h2 className="text-4xl font-bold mb-2">Events Control Engine</h2>
+                <p className="text-white/50">Manage the homepage countdown timer and upload featured dynamic events.</p>
+              </div>
+
+              {/* 1. COUNTDOWN SECTION */}
+              <div className="bg-[#111827] border border-white/5 p-8 rounded-[30px] shadow-2xl">
+                <div className="flex items-center gap-3 mb-6">
+                  <FaRegCalendarAlt className="text-2xl text-[#e11d48]" />
+                  <h3 className="text-2xl font-bold">Countdown Clock Controller</h3>
+                </div>
+                
+                <form onSubmit={handleSaveCountdown} className="grid md:grid-cols-2 gap-6 items-end">
+                  <div>
+                    <label className="block text-xs font-bold text-white/50 uppercase tracking-[2px] mb-3">Event Display Title</label>
+                    <input required type="text" value={countdownForm.next_event_title} onChange={e => setCountdownForm({...countdownForm, next_event_title: e.target.value})} placeholder="e.g., Beach Festival" className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-white outline-none focus:border-[#e11d48] transition" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-white/50 uppercase tracking-[2px] mb-3">Target Date & Time (ISO format)</label>
+                    <input required type="text" value={countdownForm.event_date} onChange={e => setCountdownForm({...countdownForm, event_date: e.target.value})} placeholder="YYYY-MM-DDTHH:MM:SS" className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-white outline-none focus:border-[#e11d48] transition font-mono" />
+                  </div>
+                  <button type="submit" disabled={savingCountdown} className="bg-[#e11d48] text-white px-10 py-4 rounded-xl font-bold uppercase tracking-[2px] hover:bg-[#be123c] transition duration-300 disabled:opacity-50 flex items-center justify-center gap-3 h-[60px] md:col-span-2 justify-self-start">
+                    {savingCountdown ? <FaSpinner className="animate-spin text-xl" /> : <><FaPlus /> Synchronize Clock</>}
+                  </button>
+                </form>
+              </div>
+
+              {/* 2. UPLOAD / ADD EVENT */}
+              <div className="bg-[#111827] border border-white/5 p-8 rounded-[30px] shadow-2xl">
+                <div className="flex items-center gap-3 mb-6">
+                  <FaPlus className="text-2xl text-[#ea580c]" />
+                  <h3 className="text-2xl font-bold">Publish New Event</h3>
+                </div>
+
+                <form onSubmit={handleAddEvent} className="space-y-6">
+                  <div className="grid md:grid-cols-2 gap-6">
+                    <div>
+                      <label className="block text-xs font-bold text-white/50 uppercase tracking-[2px] mb-3">Event Title</label>
+                      <input required type="text" value={eventForm.title} onChange={e => setEventForm({...eventForm, title: e.target.value})} placeholder="e.g., Full Moon Festival" className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-white outline-none focus:border-[#ea580c] transition" />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-white/50 uppercase tracking-[2px] mb-3">Event Category / Type</label>
+                      <input required type="text" value={eventForm.type} onChange={e => setEventForm({...eventForm, type: e.target.value})} placeholder="e.g., Special Event / Live Band" className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-white outline-none focus:border-[#ea580c] transition" />
+                    </div>
+                  </div>
+
+                  <div className="grid md:grid-cols-2 gap-6">
+                    <div>
+                      <label className="block text-xs font-bold text-white/50 uppercase tracking-[2px] mb-3">Date or Time Description</label>
+                      <input required type="text" value={eventForm.date} onChange={e => setEventForm({...eventForm, date: e.target.value})} placeholder="e.g., July 15, 2026 / Every Thursday" className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-white outline-none focus:border-[#ea580c] transition" />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-white/50 uppercase tracking-[2px] mb-3">Upload Event Image</label>
+                      <input id="event-file-input" required type="file" accept="image/*" onChange={e => setEventFile(e.target.files[0])} className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-white outline-none focus:border-[#ea580c]" />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-white/50 uppercase tracking-[2px] mb-3">Event Description</label>
+                    <textarea required value={eventForm.desc} onChange={e => setEventForm({...eventForm, desc: e.target.value})} rows="4" placeholder="Describe the luxury event experience details..." className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-white outline-none focus:border-[#ea580c] transition resize-none"></textarea>
+                  </div>
+
+                  <button type="submit" disabled={addingEvent} className="bg-[#ea580c] text-white px-10 py-4 rounded-xl font-bold uppercase tracking-[2px] hover:bg-[#d94a08] transition duration-300 disabled:opacity-50 flex items-center justify-center gap-3 h-[60px]">
+                    {addingEvent ? <FaSpinner className="animate-spin text-xl" /> : <><FaUpload /> Publish Event</>}
+                  </button>
+                </form>
+              </div>
+
+              {/* 3. ACTIVE EVENTS LIST */}
+              <div className="space-y-6">
+                <h3 className="text-2xl font-bold">Active Events Portfolio ({eventList.length})</h3>
+                <div className="grid md:grid-cols-2 gap-6">
+                  {eventList.map((event, index) => (
+                    <div key={index} className="flex gap-6 p-6 rounded-2xl bg-white/5 border border-white/5 hover:border-white/10 transition duration-300 relative overflow-hidden group">
+                      <div className="w-32 h-32 rounded-xl overflow-hidden shrink-0 border border-white/10">
+                        <img src={event.image} alt={event.title} className="w-full h-full object-cover group-hover:scale-105 transition duration-500" />
+                      </div>
+                      <div className="flex-1 flex flex-col justify-between min-w-0 pr-10">
+                        <div>
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="text-[#ea580c] font-bold text-xs uppercase tracking-[1px]">{event.type}</span>
+                            <span className="text-white/40 text-xs">•</span>
+                            <span className="text-white/60 text-xs font-semibold">{event.date}</span>
+                          </div>
+                          <h4 className="text-xl font-bold text-white mb-2 truncate">{event.title}</h4>
+                          <p className="text-white/50 text-sm line-clamp-2 leading-relaxed">{event.desc}</p>
+                        </div>
+                      </div>
+                      <button onClick={() => handleDeleteEvent(index)} className="absolute top-6 right-6 w-10 h-10 rounded-lg flex items-center justify-center text-red-400 hover:bg-red-500/20 transition">
+                        <FaTrash />
+                      </button>
+                    </div>
+                  ))}
+                </div>
               </div>
             </motion.div>
           )}

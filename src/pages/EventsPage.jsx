@@ -81,8 +81,19 @@ function EventsPage() {
   const { content } = useCMS("events", {
     hero_subtitle: "The Heart of Kisumu",
     hero_title: "NIGHTLIFE",
-    event_date: "2026-12-31T23:59:59"
+    event_date: "2026-12-31T23:59:59",
+    next_event_title: "Beach Festival",
+    featured_events: JSON.stringify(featuredEvents)
   });
+
+  // Dynamically parse events from CMS
+  let displayEvents = [];
+  try {
+    displayEvents = JSON.parse(content.featured_events);
+    if (!Array.isArray(displayEvents)) displayEvents = featuredEvents;
+  } catch (e) {
+    displayEvents = featuredEvents;
+  }
 
   const [selectedEvent, setSelectedEvent] = useState(null);
   const [modalForm, setModalForm] = useState({ name: "", guests: "2" });
@@ -120,10 +131,10 @@ function EventsPage() {
         <section className="py-24 px-6 bg-[#111827] border-b border-white/5 relative overflow-hidden">
           <div className="absolute inset-0 bg-[#ea580c]/5 blur-3xl rounded-full w-[800px] h-[800px] -top-1/2 left-1/2 -translate-x-1/2"></div>
           <div className="relative z-10 max-w-[1200px] mx-auto text-center">
-            <p className="uppercase tracking-[5px] text-[#ea580c] font-semibold mb-12">Next Major Event: Beach Festival</p>
+            <p className="uppercase tracking-[5px] text-[#ea580c] font-semibold mb-12">Next Major Event: {content.next_event_title || "Beach Festival"}</p>
             <Countdown targetDate={content.event_date} />
             <button 
-              onClick={() => setSelectedEvent({ title: "Beach Festival", date: "TBD" })}
+              onClick={() => setSelectedEvent({ title: content.next_event_title || "Beach Festival", date: "TBD" })}
               className="mt-16 bg-white text-[#111827] px-10 py-4 rounded-full font-bold uppercase tracking-[2px] hover:bg-[#ea580c] hover:text-white transition duration-300 shadow-[0_0_20px_rgba(255,255,255,0.2)] hover:shadow-[0_0_30px_rgba(234,88,12,0.5)]"
             >
               Get Tickets
@@ -157,7 +168,7 @@ function EventsPage() {
 
         {/* FEATURED */}
         <section className="bg-[#ffffff]">
-          {featuredEvents.map((event, i) => (
+          {displayEvents.map((event, i) => (
             <div key={i} className={`grid lg:grid-cols-2 ${i % 2 !== 0 ? 'bg-[#f9fafb]' : ''}`}>
               <div className={`relative h-[600px] lg:h-auto overflow-hidden ${i % 2 !== 0 ? 'lg:order-2' : ''}`}>
                 <motion.img initial={{ scale: 1.1 }} whileInView={{ scale: 1 }} transition={{ duration: 1.5 }} viewport={{ once: true }} src={event.image} alt={event.title} className="absolute inset-0 w-full h-full object-cover" />

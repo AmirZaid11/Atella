@@ -92,11 +92,12 @@ function Footer() {
         </div>
 
         {/* BOTTOM */}
-        <div className="border-t border-gray-200 mt-16 pt-8 flex items-center justify-center text-[#9ca3af] relative">
+        <div className="border-t border-gray-200 mt-16 pt-8 flex flex-col items-center justify-center text-[#9ca3af] relative gap-2 text-center">
           <p>© 2026 Attela Beach Resort. All Rights Reserved.</p>
+          <p className="text-xs text-gray-400/80 font-medium tracking-[2px] uppercase mt-1">Created by Ernest Eddy Ojwang</p>
           <button 
             onClick={() => setShowLogin(true)}
-            className="absolute right-0 text-gray-300 hover:text-[#ea580c] transition duration-300"
+            className="absolute left-0 top-1/2 -translate-y-1/2 text-gray-300 hover:text-[#ea580c] transition duration-300"
           >
             <FaShieldAlt />
           </button>
