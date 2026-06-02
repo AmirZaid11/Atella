@@ -125,7 +125,7 @@ function AboutPage() {
             >
               <source src={heroVideo} type="video/mp4" />
             </video>
-            <div className="absolute inset-0 bg-gradient-to-t from-[#ffffff] via-transparent to-transparent"></div>
+            <div className="absolute inset-0 bg-linear-to-t from-[#ffffff] via-transparent to-transparent"></div>
           </motion.div>
 
           <div className="relative z-10 text-center px-6 pt-28 md:pt-36">
@@ -321,7 +321,7 @@ function AboutPage() {
                   className="relative"
                 >
                   {/* Timeline Dot */}
-                  <div className="absolute -left-[58px] md:-left-[98px] top-2 w-8 h-8 rounded-full bg-[#ffffff] border-4 border-[#ea580c] shadow-[0_0_15px_rgba(234,88,12,0.5)]"></div>
+                  <div className="absolute left-[-58px] md:left-[-98px] top-2 w-8 h-8 rounded-full bg-[#ffffff] border-4 border-[#ea580c] shadow-[0_0_15px_rgba(234,88,12,0.5)]"></div>
                   
                   <p className="text-2xl font-bold text-[#ea580c] mb-2">{item.year}</p>
                   <h3 className="text-4xl font-bold text-[#111827] mb-6">{item.title}</h3>
@@ -339,8 +339,8 @@ function AboutPage() {
         {/* 6. FINAL CTA */}
         <section className="py-40 px-6 bg-[#0ea5e9] relative overflow-hidden">
           {/* Decorative Elements */}
-          <div className="absolute -top-[20%] -right-[10%] w-[800px] h-[800px] bg-white/10 rounded-full blur-3xl mix-blend-overlay"></div>
-          <div className="absolute -bottom-[20%] -left-[10%] w-[600px] h-[600px] bg-black/10 rounded-full blur-3xl mix-blend-overlay"></div>
+          <div className="absolute top-[-20%] right-[-10%] w-[800px] h-[800px] bg-white/10 rounded-full blur-3xl mix-blend-overlay"></div>
+          <div className="absolute bottom-[-20%] left-[-10%] w-[600px] h-[600px] bg-black/10 rounded-full blur-3xl mix-blend-overlay"></div>
 
           <div className="relative z-10 max-w-[1200px] mx-auto text-center">
             <h2 className="text-6xl md:text-8xl lg:text-[130px] font-bold text-white leading-[0.9] mb-12 drop-shadow-lg">
