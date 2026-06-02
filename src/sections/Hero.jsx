@@ -11,7 +11,7 @@ function Hero() {
   });
 
   return (
-    <section className="relative h-screen overflow-hidden">
+    <section className="relative min-h-[100svh] flex items-center overflow-hidden">
 
       {/* VIDEO */}
       <video
@@ -32,7 +32,7 @@ function Hero() {
       <div className="absolute inset-0 bg-gradient-to-t from-[#ffffff] via-[#ffffff]/20 to-transparent"></div>
 
       {/* CONTENT */}
-      <div className="relative z-10 h-full flex items-center pt-28 md:pt-36">
+      <div className="relative z-10 w-full pt-36 pb-24 md:pt-48 md:pb-32">
 
         <div className="max-w-[1600px] mx-auto w-full px-6">
 
