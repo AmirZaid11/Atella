@@ -69,6 +69,7 @@ function AdminPage() {
   const [addingEvent, setAddingEvent] = useState(false);
   const [countdownForm, setCountdownForm] = useState({ next_event_title: "Beach Festival", event_date: "2026-12-31T23:59:59" });
   const [savingCountdown, setSavingCountdown] = useState(false);
+  const [editingEventIndex, setEditingEventIndex] = useState(null);
 
   useEffect(() => {
     if (activeTab === "gallery" || activeTab === "overview") fetchImages();
@@ -226,51 +227,130 @@ function AdminPage() {
     }
   };
 
-  const handleAddEvent = async (e) => {
+  const handleStartEditEvent = (index) => {
+    const eventToEdit = eventList[index];
+    setEventForm({
+      title: eventToEdit.title || "",
+      type: eventToEdit.type || "",
+      desc: eventToEdit.desc || "",
+      date: eventToEdit.date || ""
+    });
+    setEditingEventIndex(index);
+    const formElement = document.getElementById("publish-event-form");
+    if (formElement) formElement.scrollIntoView({ behavior: "smooth" });
+  };
+
+  const handleCancelEdit = () => {
+    setEventForm({ title: "", type: "", desc: "", date: "" });
+    setEventFile(null);
+    setEditingEventIndex(null);
+    const fileInput = document.getElementById("event-file-input");
+    if (fileInput) fileInput.value = "";
+  };
+
+  const handlePublishEventSubmit = async (e) => {
     e.preventDefault();
-    if (!eventFile) {
-      alert("Please select an event image");
-      return;
-    }
-    setAddingEvent(true);
-    try {
-      const fileName = `${Math.random()}.${eventFile.name.split('.').pop()}`;
-      const filePath = `events/${fileName}`;
-      await supabase.storage.from("images").upload(filePath, eventFile);
-      const { data: { publicUrl } } = supabase.storage.from("images").getPublicUrl(filePath);
+    if (editingEventIndex !== null) {
+      // --- EDIT MODE ---
+      setAddingEvent(true);
+      try {
+        let imageUrl = eventList[editingEventIndex].image;
+        let filePath = eventList[editingEventIndex].file_path;
 
-      const newEvent = {
-        title: eventForm.title,
-        type: eventForm.type,
-        desc: eventForm.desc,
-        image: publicUrl,
-        date: eventForm.date,
-        file_path: filePath
-      };
+        if (eventFile) {
+          // Delete old image from storage if it exists
+          if (filePath) {
+            await supabase.storage.from("images").remove([filePath]);
+          }
 
-      const updatedList = [...eventList, newEvent];
+          const fileName = `${Math.random()}.${eventFile.name.split('.').pop()}`;
+          const newPath = `events/${fileName}`;
+          await supabase.storage.from("images").upload(newPath, eventFile);
+          const { data: { publicUrl } } = supabase.storage.from("images").getPublicUrl(newPath);
+          imageUrl = publicUrl;
+          filePath = newPath;
+        }
 
-      const { error } = await supabase.from("site_content").upsert({
-        page: "events",
-        section_key: "featured_events",
-        content_type: "text",
-        content_value: JSON.stringify(updatedList)
-      }, { onConflict: 'page, section_key' });
+        const updatedEvent = {
+          title: eventForm.title,
+          type: eventForm.type,
+          desc: eventForm.desc,
+          image: imageUrl,
+          date: eventForm.date,
+          file_path: filePath
+        };
 
-      if (error) throw error;
+        const updatedList = eventList.map((item, idx) => idx === editingEventIndex ? updatedEvent : item);
 
-      setEventForm({ title: "", type: "", desc: "", date: "" });
-      setEventFile(null);
-      
-      const fileInput = document.getElementById("event-file-input");
-      if (fileInput) fileInput.value = "";
-      
-      setEventList(updatedList);
-      alert("Event added successfully!");
-    } catch (err) {
-      alert("Error adding event: " + err.message);
-    } finally {
-      setAddingEvent(false);
+        const { error } = await supabase.from("site_content").upsert({
+          page: "events",
+          section_key: "featured_events",
+          content_type: "text",
+          content_value: JSON.stringify(updatedList)
+        }, { onConflict: 'page, section_key' });
+
+        if (error) throw error;
+
+        setEventForm({ title: "", type: "", desc: "", date: "" });
+        setEventFile(null);
+        setEditingEventIndex(null);
+
+        const fileInput = document.getElementById("event-file-input");
+        if (fileInput) fileInput.value = "";
+
+        setEventList(updatedList);
+        alert("Event updated successfully!");
+      } catch (err) {
+        alert("Error updating event: " + err.message);
+      } finally {
+        setAddingEvent(false);
+      }
+    } else {
+      // --- ADD MODE ---
+      if (!eventFile) {
+        alert("Please select an event image");
+        return;
+      }
+      setAddingEvent(true);
+      try {
+        const fileName = `${Math.random()}.${eventFile.name.split('.').pop()}`;
+        const filePath = `events/${fileName}`;
+        await supabase.storage.from("images").upload(filePath, eventFile);
+        const { data: { publicUrl } } = supabase.storage.from("images").getPublicUrl(filePath);
+
+        const newEvent = {
+          title: eventForm.title,
+          type: eventForm.type,
+          desc: eventForm.desc,
+          image: publicUrl,
+          date: eventForm.date,
+          file_path: filePath
+        };
+
+        const updatedList = [...eventList, newEvent];
+
+        const { error } = await supabase.from("site_content").upsert({
+          page: "events",
+          section_key: "featured_events",
+          content_type: "text",
+          content_value: JSON.stringify(updatedList)
+        }, { onConflict: 'page, section_key' });
+
+        if (error) throw error;
+
+        setEventForm({ title: "", type: "", desc: "", date: "" });
+        setEventFile(null);
+
+        const fileInput = document.getElementById("event-file-input");
+        if (fileInput) fileInput.value = "";
+
+        setEventList(updatedList);
+        alert("Event added successfully!");
+      } catch (err) {
+        alert("Error adding event: " + err.message);
+      } finally {
+        setAddingEvent(false);
+      }
     }
   };
 
@@ -541,14 +621,23 @@ function AdminPage() {
                 </form>
               </div>
 
-              {/* 2. UPLOAD / ADD EVENT */}
-              <div className="bg-[#111827] border border-white/5 p-8 rounded-[30px] shadow-2xl">
+              {/* 2. UPLOAD / EDIT EVENT FORM */}
+              <div id="publish-event-form" className="bg-[#111827] border border-white/5 p-8 rounded-[30px] shadow-2xl">
                 <div className="flex items-center gap-3 mb-6">
-                  <FaPlus className="text-2xl text-[#ea580c]" />
-                  <h3 className="text-2xl font-bold">Publish New Event</h3>
+                  {editingEventIndex !== null ? (
+                    <>
+                      <FaEdit className="text-2xl text-[#8b5cf6]" />
+                      <h3 className="text-2xl font-bold">Edit Event: {eventForm.title}</h3>
+                    </>
+                  ) : (
+                    <>
+                      <FaPlus className="text-2xl text-[#ea580c]" />
+                      <h3 className="text-2xl font-bold">Publish New Event</h3>
+                    </>
+                  )}
                 </div>
 
-                <form onSubmit={handleAddEvent} className="space-y-6">
+                <form onSubmit={handlePublishEventSubmit} className="space-y-6">
                   <div className="grid md:grid-cols-2 gap-6">
                     <div>
                       <label className="block text-xs font-bold text-white/50 uppercase tracking-[2px] mb-3">Event Title</label>
@@ -566,8 +655,10 @@ function AdminPage() {
                       <input required type="text" value={eventForm.date} onChange={e => setEventForm({...eventForm, date: e.target.value})} placeholder="e.g., July 15, 2026 / Every Thursday" className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-white outline-none focus:border-[#ea580c] transition" />
                     </div>
                     <div>
-                      <label className="block text-xs font-bold text-white/50 uppercase tracking-[2px] mb-3">Upload Event Image</label>
-                      <input id="event-file-input" required type="file" accept="image/*" onChange={e => setEventFile(e.target.files[0])} className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-white outline-none focus:border-[#ea580c]" />
+                      <label className="block text-xs font-bold text-white/50 uppercase tracking-[2px] mb-3">
+                        {editingEventIndex !== null ? "Replace Event Image (Optional)" : "Upload Event Image"}
+                      </label>
+                      <input id="event-file-input" required={editingEventIndex === null} type="file" accept="image/*" onChange={e => setEventFile(e.target.files[0])} className="w-full bg-white/5 border border-white/10 rounded-xl p-3 text-white outline-none focus:border-[#ea580c]" />
                     </div>
                   </div>
 
@@ -576,9 +667,22 @@ function AdminPage() {
                     <textarea required value={eventForm.desc} onChange={e => setEventForm({...eventForm, desc: e.target.value})} rows="4" placeholder="Describe the luxury event experience details..." className="w-full bg-white/5 border border-white/10 rounded-xl p-4 text-white outline-none focus:border-[#ea580c] transition resize-none"></textarea>
                   </div>
 
-                  <button type="submit" disabled={addingEvent} className="bg-[#ea580c] text-white px-10 py-4 rounded-xl font-bold uppercase tracking-[2px] hover:bg-[#d94a08] transition duration-300 disabled:opacity-50 flex items-center justify-center gap-3 h-[60px]">
-                    {addingEvent ? <FaSpinner className="animate-spin text-xl" /> : <><FaUpload /> Publish Event</>}
-                  </button>
+                  <div className="flex flex-wrap gap-4">
+                    <button type="submit" disabled={addingEvent} className={`text-white px-10 py-4 rounded-xl font-bold uppercase tracking-[2px] transition duration-300 disabled:opacity-50 flex items-center justify-center gap-3 h-[60px] ${editingEventIndex !== null ? 'bg-[#8b5cf6] hover:bg-[#7c3aed]' : 'bg-[#ea580c] hover:bg-[#d94a08]'}`}>
+                      {addingEvent ? (
+                        <FaSpinner className="animate-spin text-xl" />
+                      ) : editingEventIndex !== null ? (
+                        <><FaCheckCircle /> Save Event Changes</>
+                      ) : (
+                        <><FaUpload /> Publish Event</>
+                      )}
+                    </button>
+                    {editingEventIndex !== null && (
+                      <button type="button" onClick={handleCancelEdit} className="bg-white/10 text-white px-8 py-4 rounded-xl font-bold uppercase tracking-[2px] hover:bg-white/20 transition h-[60px]">
+                        Cancel Edit
+                      </button>
+                    )}
+                  </div>
                 </form>
               </div>
 
@@ -602,9 +706,14 @@ function AdminPage() {
                           <p className="text-white/50 text-sm line-clamp-2 leading-relaxed">{event.desc}</p>
                         </div>
                       </div>
-                      <button onClick={() => handleDeleteEvent(index)} className="absolute top-6 right-6 w-10 h-10 rounded-lg flex items-center justify-center text-red-400 hover:bg-red-500/20 transition">
-                        <FaTrash />
-                      </button>
+                      <div className="absolute top-6 right-6 flex items-center gap-2">
+                        <button onClick={() => handleStartEditEvent(index)} className="w-10 h-10 rounded-lg flex items-center justify-center text-blue-400 hover:bg-blue-500/20 transition" title="Edit Event">
+                          <FaEdit />
+                        </button>
+                        <button onClick={() => handleDeleteEvent(index)} className="w-10 h-10 rounded-lg flex items-center justify-center text-red-400 hover:bg-red-500/20 transition" title="Delete Event">
+                          <FaTrash />
+                        </button>
+                      </div>
                     </div>
                   ))}
                 </div>
