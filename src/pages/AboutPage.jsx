@@ -128,7 +128,7 @@ function AboutPage() {
             <div className="absolute inset-0 bg-gradient-to-t from-[#ffffff] via-transparent to-transparent"></div>
           </motion.div>
 
-          <div className="relative z-10 text-center px-6">
+          <div className="relative z-10 text-center px-6 pt-28 md:pt-36">
             <motion.p
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}

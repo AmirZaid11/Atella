@@ -32,7 +32,7 @@ function Hero() {
       <div className="absolute inset-0 bg-gradient-to-t from-[#ffffff] via-[#ffffff]/20 to-transparent"></div>
 
       {/* CONTENT */}
-      <div className="relative z-10 h-full flex items-center">
+      <div className="relative z-10 h-full flex items-center pt-28 md:pt-36">
 
         <div className="max-w-[1600px] mx-auto w-full px-6">
 
